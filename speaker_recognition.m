@@ -5,10 +5,10 @@ function speaker_recognition
 
 	disp('training');
 	for i=3:audio_cant(1) % . and .. not included
-		if mod(i,3)==0 % first audios for learning
+		if mod(i,3)==0 % first audios for training
 			audio = strcat('resources/audio/',char(audio_files(i)));
-			disp(audio);
-			[y, s] = wavread(audio);
+			[signal, fm] = wavread(audio);
+			mfcc(signal,fm);
 			%TODO: coeficientes mel-cepstrales estáticos y dinámicos
 			%TODO: algoritmo de quantización vectorial, como vq(data, nvector)
 		end
@@ -17,9 +17,8 @@ function speaker_recognition
 
 	disp('testing');
 	for i=3:audio_cant(1) % . and .. not included
-		if mod(i,3)~=0 % first audios for learning
+		if mod(i,3)~=0 % all audios except training ones
 			audio = strcat('resources/audio/',char(audio_files(i)));
-			disp(audio);
 			[y, s] = wavread(audio);
 			%TODO: coeficientes mel-cepstrales estáticos y dinámicos
 			%TODO: Buscar vectores que minimizen la distorción media, como con meandist(data,code)
