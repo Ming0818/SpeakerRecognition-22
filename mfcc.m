@@ -2,7 +2,7 @@
 %% [1] http://practicalcryptography.com/miscellaneous/machine-learning/guide-mel-frequency-cepstral-coefficients-mfccs/
 %% [2] http://arxiv.org/pdf/1003.4083.pdf
 %% [3] http://ijirae.com/volumes/vol1/issue10/27.NVEC10086.pdf
-%% [4] An efficient mfcc extraction method in speech recognition
+%% [4] An efficient mfcc extraction method in speech recognition - Han, Chan, Choy, Pun
 %% [5] http://in.mathworks.com/matlabcentral/answers/24455-divide-audio-signal-into-frames
 
 %% Para escuchar una señal con sound(), instalar octave-sound 
@@ -67,7 +67,7 @@ function mfcc(signal, fm)
 	
 	frames_filtered = filterbank * frames_fft(1:(N/2+1),:);
 
-	% MFCCs
+	% Mel Frequency cepstrum [4]
 	ncoef = 13; 
 	for n=1:(ncoef-1)
 		c = 0;
@@ -76,7 +76,9 @@ function mfcc(signal, fm)
 		end	
 		mfcc(n) = c;
 	end
-
+	
+	
+	mfcc(ncoef) = logen(signal, N);
 end
 
 
@@ -91,12 +93,12 @@ function frames=framing(signal, N, M)
 	end
 end
 
-% Frecuency to mel scale [1]
+% Frecuency to mel scale [4]
 function mel = hz2mel(f)
-	return 1125*ln(1+f/700);
+	return 1127*ln(1+f/700);
 end
 
-% Mel scale to frecuency [1]
+% Mel scale to frecuency 
 function hz = mel2hz(mel)
-	return 700*(exp(mel/1125));
+	return 700*(exp(mel/1127));
 end
