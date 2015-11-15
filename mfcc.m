@@ -8,10 +8,10 @@
 %% Para escuchar una señal con sound(), instalar octave-sound 
 %% y mirar http://notesofaprogrammer.blogspot.com.ar/2014/09/audio-playing-and-recording-with-octave.html
 
-function mfcc(signal, fm)
+function mfcc = mfcc(signal, fm)
 
-	frame_step = 0.010;
-	M = fm * frame_step; % 80 frames total	
+	frame_step = 0.020;
+	M = fm * frame_step; % 160 muestras total	
 	N = floor(length(signal)/M); % frame length (different for every signal)
 
 	% Pre–emphasis filter. Reference [2]
@@ -22,7 +22,7 @@ function mfcc(signal, fm)
 
 	% Framing. Reference [5]
 	frames = framing(signal_emph,N, M);
-
+	
 	% Windowing. Reference [2]
 	hamming_window = 0.54 - 0.46 * cos(2 * pi * [0 : N - 1].'/(N - 1));
 	frames_hamming = frames.*hamming_window;
@@ -31,7 +31,6 @@ function mfcc(signal, fm)
 	for i=1:M
 		frames_fft(:,i) = fft(frames_hamming(:,i));
 	end
-
 	% Mel-frequency Wrapping [1]
 
 	% % Convert the upper and lower freq to Mels
@@ -45,17 +44,20 @@ function mfcc(signal, fm)
 	nfilterbanks = 26;
 	filter_rand_points = randperm(round(upper_freq-lower_freq), nfilterbanks).+ (lower_freq - 1);
 	filter_points_mel = [lower_freq, filter_rand_points, upper_freq];
-	
+	%%melpoints size OK
+
 	% % Convert points back to Hz
 	filter_points_hz = arrayfun(@mel2hz, filter_points_mel);		
 
 	% % Round frecuencys to the nearest FFT bin (we need nfft and sample rate = fm)
-	nfft = 512; 
-	fft_bin = floor((N+1)*filter_points_hz/fm);
+	nfft = M; 
+	fft_bin = floor((nfft+1)*filter_points_hz/fm);
+	size(fft_bin)
 
 	% % Create the filterbanks. The first filterbank will start at first point, peak at second, return to zero at 3rd.
 	% % Second one, start at 2nd, reach max at 3rd, zero at 4th. And so on.
-	filterbank = zeros(nfilterbanks, nfft/2 + 1);	
+	filterbank = zeros(nfilterbanks, nfft/2 +1);	
+	
 	for i = 1:nfilterbanks
 		for k=fft_bin(i):fft_bin(i+1)
 			filterbank(i,k) = (k - fft_bin(i))/(fft_bin(i+1)-fft_bin(i));
@@ -64,8 +66,7 @@ function mfcc(signal, fm)
 			filterbank(i,k) = (fft_bin(i+2)-k)/(fft_bin(i+2)-fft_bin(i+1));
 		end
 	end
-	
-	frames_filtered = frames_fft(1:(N/2+1),:) * filterbank;
+	frames_filtered = filterbank * frames_fft(1:(nfft/2+1),:);
 
 	% Mel Frequency cepstrum [4]
 	ncoef = 13; 
@@ -74,7 +75,7 @@ function mfcc(signal, fm)
 		for j = 1: nfilterbanks
 			c+=log(frames_filtered(:,j)*cos(n*(k-0.5)*pi/nfilterbanks));		
 		end	
-		mfcc_aux(n) = c;
+		mfcc_aux(:,n) = c;
 	end
 	% mfcc_aux queda una matriz, porque cada c es una columna (coef de 1 frame).
 	
@@ -96,8 +97,6 @@ end
 % En la matriz frames, 1 frame por columna.
 function frames=framing(signal, N, M)
 	frames = zeros(N,M); 
-	disp(N*M)
-	disp(length(signal))
 	for k=0:M-1
 	    frames(:,k+1) = signal(1+N*k:N*(k+1));
 	end
@@ -109,6 +108,6 @@ function mel = hz2mel(f)
 end
 
 % Mel scale to frecuency 
-function hz = mel2hz(mel)
-	hz = 700*(exp(mel/1127));
+function h = mel2hz(mel)
+	h = 700*(10^(mel/2595.0)-1);
 end
