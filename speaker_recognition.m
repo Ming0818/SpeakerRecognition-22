@@ -10,7 +10,7 @@ function speaker_recognition
 			audio = strcat('resources/audio/',char(audio_files(i)));
 			[signal, fm] = wavread(audio);
 			coef = mfcc(signal,fm);
-			coefvq(i-2) = vq(coef, 16);
+			%coefvq(:, :, i-2) = vq(coef, 16);
 		end
 	end
 
@@ -25,10 +25,10 @@ function speaker_recognition
 			disp(strcat('Analizing: ',audio));
 			[y, s] = wavread(audio);
 			coef = mfcc(signal,fm);		
-			for k=1:audio_speakers
-				aux(k) = meandist(coef,coefvq(k));
-			end
-			[min,index] = min(aux);
+			%for k=1:audio_speakers
+			%	aux(k) = meandist(coef,coefvq(k));
+			%end
+			%[min,index] = min(aux);
 			%disp(strcat('Recognition: ',names[index]));
 			%cmp = strcmp(name, names[index]);
 			%if cmp==1
