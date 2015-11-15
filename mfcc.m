@@ -25,10 +25,10 @@ function mfcc(signal, fm)
 
 	% Windowing. Reference [2]
 	hamming_window = 0.54 - 0.46 * cos(2 * pi * [0 : N - 1].'/(N - 1));
-	frames_hamming = frame.*hamming_window;
+	frames_hamming = frames.*hamming_window;
 
 	% FFT for every frame
-	for i=1:length(frames)
+	for i=1:M
 		frames_fft(:,i) = fft(frames_hamming(:,i));
 	end
 
@@ -43,36 +43,36 @@ function mfcc(signal, fm)
 	
 	% % get X points between those mels
 	nfilterbanks = 26;
-	filter_rand_points = randperm(upper_freq-lower_freq, nfilterbanks).+ (lower_freq - 1);
+	filter_rand_points = randperm(round(upper_freq-lower_freq), nfilterbanks).+ (lower_freq - 1);
 	filter_points_mel = [lower_freq, filter_rand_points, upper_freq];
 	
 	% % Convert points back to Hz
-	filter_points_hz = arrayfun(@mel2hz, filter_ponts_mel);		
+	filter_points_hz = arrayfun(@mel2hz, filter_points_mel);		
 
 	% % Round frecuencys to the nearest FFT bin (we need nfft and sample rate = fm)
 	nfft = 512; 
-	fft_bin = floor((nfft+1)*filter_points_hz/fm);
+	fft_bin = floor((N+1)*filter_points_hz/fm);
 
 	% % Create the filterbanks. The first filterbank will start at first point, peak at second, return to zero at 3rd.
 	% % Second one, start at 2nd, reach max at 3rd, zero at 4th. And so on.
 	filterbank = zeros(nfilterbanks, nfft/2 + 1);	
 	for i = 1:nfilterbanks
 		for k=fft_bin(i):fft_bin(i+1)
-			filterbank(i,k) = (k - fft_bin(i))/(fft_bin(j+1)-fft_bin(j));
+			filterbank(i,k) = (k - fft_bin(i))/(fft_bin(i+1)-fft_bin(i));
 		end
 		for k=fft_bin(i+1):fft_bin(i+2)
-			filterbank(i,k) = (fft_bin(i+2)-k)/(fft_bin(j+2)-fft_bin(j+1));
+			filterbank(i,k) = (fft_bin(i+2)-k)/(fft_bin(i+2)-fft_bin(i+1));
 		end
 	end
 	
-	frames_filtered = filterbank * frames_fft(1:(N/2+1),:);
+	frames_filtered = frames_fft(1:(N/2+1),:) * filterbank;
 
 	% Mel Frequency cepstrum [4]
 	ncoef = 13; 
 	for n=1:(ncoef-1)
 		c = 0;
 		for j = 1: nfilterbanks
-			c+=log(frames_filtered(:,j)*cos(n*(k-0.5)*pi/nfilterbanks);		
+			c+=log(frames_filtered(:,j)*cos(n*(k-0.5)*pi/nfilterbanks));		
 		end	
 		mfcc_aux(n) = c;
 	end
@@ -105,10 +105,10 @@ end
 
 % Frecuency to mel scale [4]
 function mel = hz2mel(f)
-	return 1127*ln(1+f/700);
+	mel = 1127*log(1+f/700);
 end
 
 % Mel scale to frecuency 
 function hz = mel2hz(mel)
-	return 700*(exp(mel/1127));
+	hz = 700*(exp(mel/1127));
 end
