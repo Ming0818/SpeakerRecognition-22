@@ -5,6 +5,7 @@
 %
 %Parámetros de salida:
 %* en = coeficiente número 13 del mfcc
+% Reference: An efficient extraction method in speech recognition 
 
 function en = logen(fr, frsize)
 	en = 0;

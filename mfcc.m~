@@ -76,7 +76,7 @@ function mfcc(signal, fm)
 		end	
 		mfcc_aux(n) = c;
 	end
-	% mfcc_aux queda una matriz, porque cada c es una columna (coef de 1 frame).
+	% mfcc_aux queda una matriz, porque cada c es una columna de 1 frame.
 	
 	%%for f=1:M
 	%%	for j=1:ncoef
