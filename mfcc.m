@@ -20,10 +20,10 @@ function mfcc(signal, fm)
 	end
 	signal_emph(1)=signal(1);
 
-	% Framing
+	% Framing. Reference [5]
 	frames = framing(signal_emph,N, M);
 
-	% Windowing (from [2])
+	% Windowing. Reference [2]
 	hamming_window = 0.54 - 0.46 * cos(2 * pi * [0 : N - 1].'/(N - 1));
 	frames_hamming = frame.*hamming_window;
 
@@ -49,36 +49,39 @@ function mfcc(signal, fm)
 	% % Convert points back to Hz
 	filter_points_hz = arrayfun(@mel2hz, filter_ponts_mel);		
 
-	% % Round frecuencys to the nearest FFT bin (we need nfft y sample rate = fm)
+	% % Round frecuencys to the nearest FFT bin (we need nfft and sample rate = fm)
 	nfft = 512; 
 	fft_bin = floor((nfft+1)*filter_points_hz/fm);
 
 	% % Create the filterbanks. The first filterbank will start at first point, peak at second, return to zero at 3rd.
-	% % Second one, start at 2nd, reach max at 3rd, zero at 4th. And so on
+	% % Second one, start at 2nd, reach max at 3rd, zero at 4th. And so on.
 	filterbank = zeros(nfilterbanks, nfft/2 + 1);	
 	for i = 1:nfilterbanks
-		start_filter = fft_bin(i);
-		end_filter = fft_bin(i+1);
-		for k=start_filter:end_filter
+		for k=fft_bin(i):fft_bin(i+1)
 			filterbank(i,k) = (k - fft_bin(i))/(fft_bin(j+1)-fft_bin(j));
 		end
-		start_filter = fft_bin(i+1);
-		end_filter = fft_bin(i+2);
-		for k=start_filter:end_filter
+		for k=fft_bin(i+1):fft_bin(i+2)
 			filterbank(i,k) = (fft_bin(i+2)-k)/(fft_bin(j+2)-fft_bin(j+1));
 		end
 	end
 	
 	frames_filtered = filterbank * frames_fft(1:(N/2+1),:);
 
-	% Cepstrum. Converting back to time con DCT
+	% MFCCs
+	ncoef = 13; 
+	for n=1:(ncoef-1)
+		c = 0;
+		for j = 1: nfilterbanks
+			c+=log(frames_filtered(j)*cos(n*(k-0.5)*pi/nfilterbanks);		
+		end	
+		mfcc(n) = c;
+	end
 
 end
 
 
 % Devuelve M frames, con N samples por frame
 % En la matriz frames, 1 frame por columna.
-% See [5]
 function frames=framing(signal, N, M)
 	frames = zeros(N,M); 
 	disp(N*M)
