@@ -49,7 +49,7 @@ function mfcc = mfcc(signal, fm)
 	%filter_rand_points = sort(filter_rand_points);
 	%filter_points_mel = [lower_freq, filter_rand_points, upper_freq];
 	%disp(filter_points_mel)
-	%%melpoints size OK
+
 	% % Convert points back to Hz
 	filter_points_hz = arrayfun(@mel2hz, filter_points_mel);		
 
@@ -69,7 +69,7 @@ function mfcc = mfcc(signal, fm)
 			filterbank(i,k) = (fft_bin(i+2)-k)/(fft_bin(i+2)-fft_bin(i+1));
 		end
 	end
-	frames_filtered = filterbank * frames_fft(1:(nfft/2 + 1),:); %(nfft/2 + 1)
+	frames_filtered = filterbank(:,1:(nfft/2)) * frames_fft(1:(nfft/2),:); %nfft/2 +1
 
 	% Mel Frequency cepstrum [4]
 	ncoef = 13; 
