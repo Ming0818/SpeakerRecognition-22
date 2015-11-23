@@ -12,7 +12,11 @@ function mfcc = mfcc(signal, fm)
 
 	frame_step = 0.020;
 	M = fm * frame_step; % 160 muestras total	
+	overlap_cant = 0.5;
+	overlap = M*overlap_cant;
 	N = floor(length(signal)/M); % frame length (different for every signal)
+	disp(M)
+	disp(N)
 
 	% Pre–emphasis filter. Reference [2]
 	for n=2:length(signal)
@@ -97,10 +101,13 @@ end
 
 % Devuelve M frames, con N samples por frame
 % En la matriz frames, 1 frame por columna.
+% Hay un overlap del 50%
 function frames=framing(signal, N, M)
 	frames = zeros(N,M); 
-	for k=0:M-1
-	    frames(:,k+1) = signal(1+N*k:N*(k+1));
+	overlap = floor(N/2);
+	frame(:,1)=signal(1:N);
+	for k=1:M-1
+	    frames(:,k+1) = signal((1+N*k-overlap):N*(k+1)-overlap);
 	end
 end
 
@@ -113,4 +120,3 @@ end
 function h = mel2hz(mel)
 	h = 700*(10^(mel/2595.0)-1);
 end
-
