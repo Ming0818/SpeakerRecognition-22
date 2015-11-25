@@ -8,7 +8,7 @@
 % La función calcula los deltas correspondientes y los guarda en mfcc para su posterior uso.
 function mfcc = calculateDeltas(totalFrames, mfcc, totalMfcc)
 	for frame = 1:totalFrames
-		deltas = mfcc;
+		deltas = mfcc';
 		delta(1,:) = (2*(mfcc(:,3)-mfcc(:,1)) + (mfcc(:,2)-mfcc(:,1)))/10;
 		delta(2,:) = (2*(mfcc(:,4)-mfcc(:,1)) + (mfcc(:,3) - mfcc(:,1)))/10;
 		for deltaFrame = 3 : (totalFrames-2)

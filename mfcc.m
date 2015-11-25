@@ -26,15 +26,24 @@ function mfcc = mfcc(signal, fm)
 
 	% Framing. Reference [5]
 	frames = framing(signal_emph,N, M);
-	
+	disp(size(frames))
+
 	% Windowing. Reference [2]
 	hamming_window = 0.54 - 0.46 * cos(2 * pi * [0 : N - 1].'/(N - 1));
-	frames_hamming = frames.*hamming_window;
-
+	disp(size(hamming_window))
+	disp(size(frames)(2))
+	for l=1:size(frames)(2)
+		frames_hamming(:,l) = frames(:,l).*hamming_window;
+	end
+	disp(size(frames_hamming))
 	% FFT for every frame
+	frames_fft = zeros(size(frames_hamming)(1),M);
+
+	fflush(stdout);
 	for i=1:M
 		frames_fft(:,i) = fft(frames_hamming(:,i));
 	end
+	disp(frames_fft)
 	% Mel-frequency Wrapping [1]
 
 	% % Convert the upper and lower freq to Mels
@@ -74,26 +83,34 @@ function mfcc = mfcc(signal, fm)
 		end
 	end
 	frames_filtered = filterbank(:,1:(nfft/2)) * frames_fft(1:(nfft/2),:); %nfft/2 +1
-
+	disp(frames_filtered)
 	% Mel Frequency cepstrum [4]
 	ncoef = 13; 
 	for n=1:(ncoef-1)
 		c = 0;
 		for j = 1: nfilterbanks
-			c+=log(frames_filtered(:,j)*cos(n*(k-0.5)*pi/nfilterbanks));		
+			disp('log')
+			disp(log(frames_filtered(j)))
+			c+=log(frames_filtered(:,j))*cos(n*(k-0.5)*pi/nfilterbanks);		
+			disp('c')
+			disp(c)
 		end	
 		mfcc_aux(:,n) = c;
 	end
-	
-	%%for f=1:M
-	%%	for j=1:ncoef
-	%%		mfcc(j,f)=mfcc_aux(j);		
-	%%	end
-	%%end
 
-	mfcc(ncoef) = logen(signal, N);
+	%esta bien que los coeficientes den arrays? :s
+	%dan infinito tmb..
 
-	% TODO: Deltas [4]
+	%TODO: for para cada frame
+		mfcc_aux(ncoef) = logen(signal, N);
+
+	disp('asd')
+	disp(mfcc_aux)
+	disp(size(mfcc_aux))
+	mfcc = zeros(size(mfcc_aux)(1),26);
+	mfcc = mfcc_aux(:,:);
+	%disp(size(mfcc))
+	mfcc = calculateDeltas(M, mfcc, 26);
 	
 
 end
@@ -103,10 +120,10 @@ end
 % En la matriz frames, 1 frame por columna.
 % Hay un overlap del 50%
 function frames=framing(signal, N, M)
-	disp('framing')
-	disp(M)
-	disp(N)
-	disp(length(signal))
+	%disp('framing')
+	%disp(M)
+	%disp(N)
+	%disp(length(signal))
 	frames = zeros(N,M); 
 	overlap = floor(N/2);
 	frame(:,1)=signal(1:N);
@@ -118,12 +135,12 @@ function frames=framing(signal, N, M)
 		aux1 = final-overlap;
 		aux2 = aux1+N-1;
 		if(k>M-10)
-			disp(' ')
-			disp(aux1)
-			disp(aux2)
-			disp(k)
-			disp(size(signal(aux1:aux2)))
-			disp(size(frames))
+			%disp(' ')
+			%disp(aux1)
+			%disp(aux2)
+			%disp(k)
+			%disp(size(signal(aux1:aux2)))
+			%disp(size(frames))
 	    end
 	    frames(:,k+1) = signal(aux1:aux2);
 	    strt = aux1;
