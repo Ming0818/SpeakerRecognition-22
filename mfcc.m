@@ -11,10 +11,10 @@
 function mfcc = mfcc(signal, fm)
 
 	frame_step = 0.020;
-	M = fm * frame_step; % 160 muestras total	
+	M = fm * frame_step; % 160 frames total	
 	overlap_cant = 0.5;
 	overlap = M*overlap_cant;
-	N = floor(length(signal)/M); % frame length (different for every signal)
+	N = floor(length(signal)/overlap); % frame length (different for every signal)
 	disp(M)
 	disp(N)
 
@@ -103,11 +103,31 @@ end
 % En la matriz frames, 1 frame por columna.
 % Hay un overlap del 50%
 function frames=framing(signal, N, M)
+	disp('framing')
+	disp(M)
+	disp(N)
+	disp(length(signal))
 	frames = zeros(N,M); 
 	overlap = floor(N/2);
 	frame(:,1)=signal(1:N);
-	for k=1:M-1
-	    frames(:,k+1) = signal((1+N*k-overlap):N*(k+1)-overlap);
+	%disp(1)
+	%disp(N)
+	strt = 1;
+	final = N;
+	for k=1:M-2
+		aux1 = final-overlap;
+		aux2 = aux1+N-1;
+		if(k>M-10)
+			disp(' ')
+			disp(aux1)
+			disp(aux2)
+			disp(k)
+			disp(size(signal(aux1:aux2)))
+			disp(size(frames))
+	    end
+	    frames(:,k+1) = signal(aux1:aux2);
+	    strt = aux1;
+		final = aux2;
 	end
 end
 
