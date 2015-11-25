@@ -15,8 +15,6 @@ function mfcc = mfcc(signal, fm)
 	overlap_cant = 0.5;
 	overlap = M*overlap_cant;
 	N = floor(length(signal)/overlap); % frame length (different for every signal)
-	disp(M)
-	disp(N)
 
 	% Pre–emphasis filter. Reference [2]
 	for n=2:length(signal)
@@ -30,12 +28,10 @@ function mfcc = mfcc(signal, fm)
 
 	% Windowing. Reference [2]
 	hamming_window = 0.54 - 0.46 * cos(2 * pi * [0 : N - 1].'/(N - 1));
-	disp(size(hamming_window))
-	disp(size(frames)(2))
 	for l=1:size(frames)(2)
 		frames_hamming(:,l) = frames(:,l).*hamming_window;
 	end
-	disp(size(frames_hamming))
+
 	% FFT for every frame
 	frames_fft = zeros(size(frames_hamming)(1),M);
 
@@ -43,7 +39,11 @@ function mfcc = mfcc(signal, fm)
 	for i=1:M
 		frames_fft(:,i) = fft(frames_hamming(:,i));
 	end
-	disp(frames_fft)
+
+	for i = 1:M
+		abs_frames(:,i) = (abs(frames_fft(:,i)).^2);
+	endfor
+
 	% Mel-frequency Wrapping [1]
 
 	% % Convert the upper and lower freq to Mels
@@ -82,31 +82,27 @@ function mfcc = mfcc(signal, fm)
 			filterbank(i,k) = (fft_bin(i+2)-k)/(fft_bin(i+2)-fft_bin(i+1));
 		end
 	end
-	frames_filtered = filterbank(:,1:(nfft/2)) * frames_fft(1:(nfft/2),:); %nfft/2 +1
-	disp(frames_filtered)
+	frames_filtered = filterbank(:,1:(nfft/2)) * abs_frames(1:(nfft/2),:); %nfft/2 +1
+
 	% Mel Frequency cepstrum [4]
 	ncoef = 13; 
 	for n=1:(ncoef-1)
 		c = 0;
-		for j = 1: nfilterbanks
-			disp('log')
-			disp(log(frames_filtered(j)))
-			c+=log(frames_filtered(:,j))*cos(n*(k-0.5)*pi/nfilterbanks);		
-			disp('c')
-			disp(c)
+		for j = 1: 12
+			%Hay un par de 0s en los frames filtrados que tiran infinito (al comienzo)
+			c+=log(frames_filtered(1,j))*cos(n*(j-0.5)*pi/12);		
 		end	
-		mfcc_aux(:,n) = c;
+		mfcc_aux(n) = c;
 	end
 
-	%esta bien que los coeficientes den arrays? :s
-	%dan infinito tmb..
+	disp('asd')
+	disp(size(mfcc_aux))
+	disp(mfcc_aux)
 
 	%TODO: for para cada frame
-		mfcc_aux(ncoef) = logen(signal, N);
-
-	disp('asd')
-	disp(mfcc_aux)
-	disp(size(mfcc_aux))
+	for k=1:M
+		mfcc_aux(ncoef,k) = logen(signal(:,k), N);
+	end
 	mfcc = zeros(size(mfcc_aux)(1),26);
 	mfcc = mfcc_aux(:,:);
 	%disp(size(mfcc))
