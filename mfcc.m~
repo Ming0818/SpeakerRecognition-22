@@ -94,7 +94,7 @@ function mfcc = mfcc(signal, fm)
 
 	%TODO: for para cada frame
 	for k=1:M
-		mfcc_aux(ncoef,k) = logen(frames(:,k), N);
+		mfcc_aux(ncoef,k) = logen(signal(:,k), N);
 	end
 
 	mfcc = zeros(size(mfcc_aux)(1),26);

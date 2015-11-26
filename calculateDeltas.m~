@@ -15,7 +15,7 @@ function mfcc = calculateDeltas(totalFrames, mfcc, totalMfcc)
 		    delta(deltaFrame,:) = (2*(mfcc(:,deltaFrame+2) - mfcc(:,deltaFrame-2)) + (mfcc(:,deltaFrame+1) - mfcc(:,deltaFrame-1)))/10;
 		end
 		delta(totalFrames-1,:) = (2*(mfcc(:,totalFrames)-mfcc(:,totalFrames-3)) + (mfcc(:,totalFrames) - mfcc(:,totalFrames-2)))/10;
-		delta(totalFrames,:) = (2*(mfcc(:,totalFrames)-mfcc(:,totalFrames-2)) + (mfcc(:,totalFrames)-mfcc(:,totalFrames-1)))/10;
+		delta(totalFrames,:) = (2*(mfcc(:,totalFrames)-mfcc(:,totalFrames-2)) + (mfcc(:,totalFrames)-mfcc(:,totalframes-1)))/10;
 		for coef = 1:totalMfcc
 			mfcc(totalMfcc+coef,frame) = deltas(frame,coef);
 		endfor
