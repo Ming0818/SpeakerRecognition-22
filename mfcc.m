@@ -9,28 +9,29 @@
 %% y mirar http://notesofaprogrammer.blogspot.com.ar/2014/09/audio-playing-and-recording-with-octave.html
 
 function mfcc = mfcc(signal, fm)
-
 	frame_step = 0.020;
 	M = fm * frame_step; % 160 frames total	
-	overlap_cant = 0.5;
-	overlap = M*overlap_cant;
-	N = floor(length(signal)/overlap); % frame length (different for every signal)
+	%overlap_cant = 0.5;
+	%overlap = M*overlap_cant;
+	%N = floor(length(signal)/overlap); % frame length (different for every signal)
 
 	% Pre–emphasis filter. Reference [2]
+	signal_emph(1)=signal(1);
 	for n=2:length(signal)
 		signal_emph(n)=signal(n)-0.95*signal(n-1);
 	end
-	signal_emph(1)=signal(1);
-
+	
 	% Framing. Reference [5]
-	frames = framing(signal_emph,N, M);
+	frames = framing(signal_emph,fm, frame_step, 0.01);
 	
 	% Windowing. Reference [2]
-	hamming_window = 0.54 - 0.46 * cos(2 * pi * [0 : N - 1].'/(N - 1));
-	for l=1:size(frames)(2)
-		frames_hamming(:,l) = frames(:,l).*hamming_window;
-	end
+	%hamming_window = 0.54 - 0.46 * cos(2 * pi * [0 : N - 1].'/(N - 1));
+	hamming_window = hamming(M); %Octave function
+	frames_hamming=frames.*hamming_window;
+	frames_hamming=frames_hamming';
 
+	N=size(frames)(2); %frame length
+	
 	% FFT for every frame
 	frames_fft = zeros(size(frames_hamming)(1),M);
 
@@ -88,7 +89,8 @@ function mfcc = mfcc(signal, fm)
 		mfcc_aux(:,r)=melcoefs(frames_filtered(:,r),nfilterbanks, ncoef);
 	end
 
-	%TODO: for para cada frame
+
+	frames=frames';
 	for k=1:M
 		mfcc_aux(ncoef,k) = logen(frames(:,k), N);
 	end
@@ -101,10 +103,22 @@ function mfcc = mfcc(signal, fm)
 end
 
 
+function r = framing(s, fs, fd, fi)
+	N = fd * fs;									% cantidad de muestras
+	fstep = fi * fs;								% step entre cada una
+	M = floor((length(s) - N) / fstep + 1);
+	
+	indf = fstep * [ 0:(M-1) ];						% indices por frames      
+    inds = [ 1:N ].';								% indices por muestra
+    ind = indf(ones(N,1),:) + inds(:,ones(1,M));
+	
+	r = s(ind);
+endfunction
+
 % Devuelve M frames, con N samples por frame
 % En la matriz frames, 1 frame por columna.
 % Hay un overlap del 50%
-function frames=framing(signal, N, M)
+function frames=fram(signal, N, M)
 	%disp('framing')
 	%disp(M)
 	%disp(N)
