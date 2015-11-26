@@ -88,10 +88,6 @@ function mfcc = mfcc(signal, fm)
 		mfcc_aux(:,r)=melcoefs(frames_filtered(:,r),nfilterbanks, ncoef);
 	end
 
-	disp('13 first coeficients')
-	disp(size(mfcc_aux))
-	disp(mfcc_aux)
-
 	%TODO: for para cada frame
 	for k=1:M
 		mfcc_aux(ncoef,k) = logen(frames(:,k), N);
@@ -100,9 +96,8 @@ function mfcc = mfcc(signal, fm)
 	mfcc = zeros(size(mfcc_aux)(1),26);
 	mfcc = mfcc_aux(:,:);
 	%disp(size(mfcc))
-	mfcc = calculateDeltas(M, mfcc, 26);
-	
-
+	mfcc = calculateDeltas(M, mfcc, 13);
+	mfcc=mfcc';
 end
 
 

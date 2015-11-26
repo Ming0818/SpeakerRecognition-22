@@ -8,12 +8,13 @@ function speaker_recognition
 	for i=3:audio_cant(1) % . and .. not included
 		if mod(i,4)==0 % first audios for training
 			audio = strcat('resources/audio/',char(audio_files(i)));
+			disp(audio)
 			[signal, fm] = wavread(audio);
 			coef = mfcc(signal,fm);
-			%coefvq(:, :, i-2) = vq(coef, 16);
+			coefvq(:, :, i-2) = vq(coef, 16);
 		end
 	end
-
+	fflush(stdout)
 
 	disp('testing');
 	rights=0;
@@ -25,9 +26,9 @@ function speaker_recognition
 			disp(strcat('Analizing: ',audio));
 			[y, s] = wavread(audio);
 			coef = mfcc(signal,fm);		
-			%for k=1:audio_speakers
-			%	aux(k) = meandist(coef,coefvq(k));
-			%end
+			for k=1:audio_speakers
+				aux(k) = meandist(coef,coefvq(k));
+			end
 			%[min,index] = min(aux);
 			%disp(strcat('Recognition: ',names[index]));
 			%cmp = strcmp(name, names[index]);
@@ -37,6 +38,6 @@ function speaker_recognition
 		end
 	end
 	
-	%efectiv = rights / audio_speakers;
-	%disp("Efectividad (entre 0 y 1):" + efectiv);
+	efectiv = rights / audio_speakers;
+	disp("Efectividad (entre 0 y 1):" + efectiv);
 end
