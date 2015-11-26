@@ -28,18 +28,13 @@ function mfcc = mfcc(signal, fm)
 	%hamming_window = 0.54 - 0.46 * cos(2 * pi * [0 : N - 1].'/(N - 1));
 	hamming_window = hamming(M); %Octave function
 	frames_hamming=frames.*hamming_window;
-	frames_hamming=frames_hamming';
 
-	N=size(frames)(2); %frame length
+	% FFT 
+	for i = 1:size(frames_hamming)(2)
+		frames_fft(:,i) = fft(frames_hamming(:, i));
+	endfor
 	
-	% FFT for every frame
-	frames_fft = zeros(size(frames_hamming)(1),M);
-
-	for i=1:M
-		frames_fft(:,i) = fft(frames_hamming(:,i));
-	end
-
-	for i = 1:M
+	for i = 1:size(frames_hamming)(2)
 		abs_frames(:,i) = (abs(frames_fft(:,i)).^2);
 	endfor
 
@@ -66,12 +61,12 @@ function mfcc = mfcc(signal, fm)
 	filter_points_hz = arrayfun(@mel2hz, filter_points_mel);		
 
 	% % Round frecuencys to the nearest FFT bin (we need nfft and sample rate = fm)
-	nfft = M; 
+	nfft = size(abs_frames)(1);
 	fft_bin = round((nfft+1)*filter_points_hz/fm);
 	
 	% % Create the filterbanks. The first filterbank will start at first point, peak at second, return to zero at 3rd.
 	% % Second one, start at 2nd, reach max at 3rd, zero at 4th. And so on.
-	filterbank = zeros(nfilterbanks, nfft/2 ); %nfft/2 +1 = 81 	
+	filterbank = zeros(nfilterbanks, nfft/2+1); %nfft/2 +1 = 81 	
 	
 	for i = 1:nfilterbanks
 		for k=fft_bin(i):fft_bin(i+1)
@@ -81,18 +76,20 @@ function mfcc = mfcc(signal, fm)
 			filterbank(i,k) = (fft_bin(i+2)-k)/(fft_bin(i+2)-fft_bin(i+1));
 		end
 	end
-	frames_filtered = filterbank(:,1:(nfft/2)) * abs_frames(1:(nfft/2),:); %nfft/2 +1
+
+	filterbank=filterbanks(300,fm/2,33,256);
+	frames_filtered = filterbank(:,1:(nfft/2+1)) * abs_frames(1:(nfft/2+1),:); %nfft/2 +1
+	%disp(frames_filtered)
 
 	% Mel Frequency cepstrum [4]
 	ncoef = 13; 
-	for r=1:M
+	for r=1:size(frames_hamming)(2)
 		mfcc_aux(:,r)=melcoefs(frames_filtered(:,r),nfilterbanks, ncoef);
 	end
 
 
-	frames=frames';
 	for k=1:M
-		mfcc_aux(ncoef,k) = logen(frames(:,k), N);
+		mfcc_aux(ncoef,k) = logen(frames(k,:), size(frames_hamming)(2));
 	end
 
 	mfcc = zeros(size(mfcc_aux)(1),26);
