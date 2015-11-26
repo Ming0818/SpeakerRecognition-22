@@ -24,8 +24,7 @@ function mfcc = mfcc(signal, fm)
 
 	% Framing. Reference [5]
 	frames = framing(signal_emph,N, M);
-	disp(size(frames))
-
+	
 	% Windowing. Reference [2]
 	hamming_window = 0.54 - 0.46 * cos(2 * pi * [0 : N - 1].'/(N - 1));
 	for l=1:size(frames)(2)
@@ -35,7 +34,6 @@ function mfcc = mfcc(signal, fm)
 	% FFT for every frame
 	frames_fft = zeros(size(frames_hamming)(1),M);
 
-	fflush(stdout);
 	for i=1:M
 		frames_fft(:,i) = fft(frames_hamming(:,i));
 	end
@@ -86,18 +84,11 @@ function mfcc = mfcc(signal, fm)
 
 	% Mel Frequency cepstrum [4]
 	ncoef = 13; 
-	for n=1:(ncoef-1)
-		c = 0;
-		for j = 1: nfilterbanks
-			%Hay un par de 0s en los frames filtrados que tiran infinito (al comienzo)
-			if(frames_filtered(1,j)!=0)
-				c+=log(frames_filtered(1,j))*cos(n*(j-0.5)*pi/nfilterbanks);		
-			end
-		end	
-		mfcc_aux(:,n) = c;
+	for r=1:M
+		mfcc_aux(:,r)=melcoefs(frames_filtered(:,r),nfilterbanks, ncoef);
 	end
 
-	disp('asd')
+	disp('13 first coeficients')
 	disp(size(mfcc_aux))
 	disp(mfcc_aux)
 
@@ -105,6 +96,7 @@ function mfcc = mfcc(signal, fm)
 	for k=1:M
 		mfcc_aux(ncoef,k) = logen(signal(:,k), N);
 	end
+
 	mfcc = zeros(size(mfcc_aux)(1),26);
 	mfcc = mfcc_aux(:,:);
 	%disp(size(mfcc))
