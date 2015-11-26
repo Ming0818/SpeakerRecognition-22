@@ -88,11 +88,13 @@ function mfcc = mfcc(signal, fm)
 	ncoef = 13; 
 	for n=1:(ncoef-1)
 		c = 0;
-		for j = 1: 12
+		for j = 1: nfilterbanks
 			%Hay un par de 0s en los frames filtrados que tiran infinito (al comienzo)
-			c+=log(frames_filtered(1,j))*cos(n*(j-0.5)*pi/12);		
+			if(frames_filtered(1,j)!=0)
+				c+=log(frames_filtered(1,j))*cos(n*(j-0.5)*pi/nfilterbanks);		
+			end
 		end	
-		mfcc_aux(n) = c;
+		mfcc_aux(:,n) = c;
 	end
 
 	disp('asd')
