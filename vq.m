@@ -10,7 +10,7 @@ function code = vq(data,nvector)
 	deps = 1e-10;
 	[dim,n] = size(data);
 	%randomizo
-	data = data(:,randperm(n));
+	%data = data(:,randperm(n));
 	%code vectors
 	code = zeros(dim,nvector);
 	%clusters
