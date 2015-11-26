@@ -2,7 +2,7 @@ function speaker_recognition
 	audio_files = readdir(strcat(pwd,'/resources/audio'));
 	audio_cant = size(audio_files); 
 	audio_speakers = floor(audio_cant(1)/4); % 4 audios per speaker
-	names = ["Eliana", "Esteban", "Juan Ignacio","Juan Pablo", "Lautaro", "María","Matías", "Mercedez", "Nicolás","Pablo","Paula", "Ricardo","Sofía"];
+	names = ['Eliana'; 'Esteban'; 'Juan Ignacio'; 'Juan Pablo'; 'Lautaro'; 'Maria';'Matias'; 'Mercedes'; 'Nicolas';'Pablo';'Paula'; 'Ricardo';'Sofia'];
 	disp(audio_speakers)
 	disp('training');
 	fflush(stdout)
@@ -38,11 +38,11 @@ function speaker_recognition
 			disp(min_value)
 			disp(index)
 			fflush(stdout)
-			%disp(strcat('Recognition: ',names[index]));
-			%cmp = strcmp(name, names[index]);
-			%if cmp==1
-			%	rights+=1;
-			%end
+			disp(strcat("Recognition: ",names(index,:)));
+			cmp = strcmp(name, names(index));
+			if cmp==1
+				rights+=1;
+			end
 		end
 	end
 	efectiv = rights / audio_speakers;
