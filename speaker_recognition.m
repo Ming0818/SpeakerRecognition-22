@@ -43,6 +43,6 @@ function speaker_recognition
 			end
 		end
 	end
-	efectiv = rights / (audio_cant-4); %le resto los de training
+	efectiv = (rights / (audio_cant(1)-audio_speakers)); %le resto los de training
 	disp(['Efectividad (entre 0 y 1):', num2str(efectiv)]);
 end
