@@ -2,7 +2,7 @@ function speaker_recognition
 	audio_files = readdir(strcat(pwd,'/resources/audio'));
 	audio_cant = size(audio_files); 
 	audio_speakers = floor(audio_cant(1)/4); % 4 audios per speaker
-	names = ['Eliana'; 'Esteban'; 'Juan_Ignacio'; 'Juan_Pablo'; 'Lautaro'; 'Maria';'Matias'; 'Mercedes'; 'Nicolas';'Pablo';'Paula'; 'Ricardo';'Sofia'];
+	names = ['Eliana'; 'Esteban'; 'Juan_Ignacio'; 'Lautaro'; 'Maria';'Matias'; 'Nicolas';'Pablo';'Paula'; 'Ricardo';'Sofia'];
 	disp(['Total Speakers ',  num2str(audio_speakers)]);
 	disp('TRAINING');
 	fflush(stdout);
@@ -27,7 +27,7 @@ function speaker_recognition
 			name = strtok(file_name, " ");
 			disp(strcat('Analizing: ',audio));
 			[s, f] = wavread(audio);
-			coef = mfcc(s,fm);	
+			coef = mfcc(s,f);	
 
 			for k=1:audio_speakers
 				aux(k) = meandist(coef,coefvq(:,:,k));
@@ -43,6 +43,8 @@ function speaker_recognition
 			end
 		end
 	end
-	efectiv = (rights / (audio_cant(1)-audio_speakers)); %le resto los de training
+  totalTestingAudios =(audio_cant(1)-audio_speakers);
+  disp(['Se reconocieron correctamente ', num2str(rights), ' de un total de ', num2str(totalTestingAudios)]);
+	efectiv = (rights / totalTestingAudios); %le resto los de training
 	disp(['Efectividad (entre 0 y 1):', num2str(efectiv)]);
 end
