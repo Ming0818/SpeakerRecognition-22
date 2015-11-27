@@ -85,7 +85,7 @@ function mfcc = mfcc(signal, fm)
 	for r=1:size(frames_hamming)(2)
 		mfcc_aux(:,r)=melcoefs(frames_filtered(:,r),nfilterbanks, ncoef);
 	end
-	
+
 	for k=1:size(frames_hamming)(2)
 		mfcc_aux(ncoef,k) = logen(frames(:,k), M);
 	end
@@ -93,7 +93,7 @@ function mfcc = mfcc(signal, fm)
 	mfcc = mfcc_aux(:,:);
 
 	mfcc = calculateDeltas(size(mfcc)(2), mfcc, 13);
-	mfcc=mfcc';
+	disp(size(mfcc))
 end
 
 
