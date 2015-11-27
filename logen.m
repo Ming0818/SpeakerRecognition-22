@@ -12,9 +12,6 @@ function en = logen(fr, frsize)
 	for n = 1 : frsize
 		en += fr(n) ** 2;
 	endfor
-	if(en!=0)
-		en = log(en);
-	end
+	en = log10(en);
+	en = en';
 endfunction
-
-

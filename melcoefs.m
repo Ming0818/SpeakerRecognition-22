@@ -9,6 +9,7 @@ function mfcc = melcoefs(frame,nfilterbanks, ncoef)
 				c+=log(frame(j,1))*cos(n*(j-0.5)*pi/nfilterbanks);		
 			end
 		end	
-		mfcc(n) = c';
+		mfcc(n) = c;
 	end
+	mfcc=mfcc';
 end

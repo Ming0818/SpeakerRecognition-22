@@ -18,7 +18,7 @@ function mfcc = mfcc(signal, fm)
 	% Pre–emphasis filter. Reference [2]
 	signal_emph(1)=signal(1);
 	for n=2:length(signal)
-		signal_emph(n)=signal(n)-0.95*signal(n-1);
+		signal_emph(n)=signal(n)-0.97*signal(n-1);
 	end
 	
 	% Framing. Reference [5]
@@ -51,7 +51,6 @@ function mfcc = mfcc(signal, fm)
 	nfilterbanks = 26;
 	step = (upper_freq-lower_freq)/(nfilterbanks + 1);
 	filter_points_mel =  lower_freq:step:upper_freq;
-
 	%filter_rand_points = randperm(round(upper_freq-lower_freq), nfilterbanks).+ (lower_freq - 1);
 	%filter_rand_points = sort(filter_rand_points);
 	%filter_points_mel = [lower_freq, filter_rand_points, upper_freq];
@@ -61,13 +60,13 @@ function mfcc = mfcc(signal, fm)
 	filter_points_hz = arrayfun(@mel2hz, filter_points_mel);		
 
 	% % Round frecuencys to the nearest FFT bin (we need nfft and sample rate = fm)
-	nfft = size(abs_frames)(1);
-	fft_bin = round((nfft+1)*filter_points_hz/fm);
-	
+	nfft = M;
+	fft_bin = floor((nfft+1)*filter_points_hz/fm);
+
 	% % Create the filterbanks. The first filterbank will start at first point, peak at second, return to zero at 3rd.
 	% % Second one, start at 2nd, reach max at 3rd, zero at 4th. And so on.
 	filterbank = zeros(nfilterbanks, nfft/2+1); %nfft/2 +1 = 81 	
-	
+
 	for i = 1:nfilterbanks
 		for k=fft_bin(i):fft_bin(i+1)
 			filterbank(i,k) = (k - fft_bin(i))/(fft_bin(i+1)-fft_bin(i));
@@ -77,39 +76,37 @@ function mfcc = mfcc(signal, fm)
 		end
 	end
 
-	filterbank=filterbanks(300,fm/2,33,256);
+	%filterbank=filterbanks(300,fm/2,33,256);
 	frames_filtered = filterbank(:,1:(nfft/2+1)) * abs_frames(1:(nfft/2+1),:); %nfft/2 +1
-	%disp(frames_filtered)
+	
 
 	% Mel Frequency cepstrum [4]
 	ncoef = 13; 
 	for r=1:size(frames_hamming)(2)
 		mfcc_aux(:,r)=melcoefs(frames_filtered(:,r),nfilterbanks, ncoef);
 	end
-
-
-	for k=1:M
-		mfcc_aux(ncoef,k) = logen(frames(k,:), size(frames_hamming)(2));
+	
+	for k=1:size(frames_hamming)(2)
+		mfcc_aux(ncoef,k) = logen(frames(:,k), M);
 	end
 
-	mfcc = zeros(size(mfcc_aux)(1),26);
 	mfcc = mfcc_aux(:,:);
-	%disp(size(mfcc))
-	mfcc = calculateDeltas(M, mfcc, 13);
+
+	mfcc = calculateDeltas(size(mfcc)(2), mfcc, 13);
 	mfcc=mfcc';
 end
 
 
-function r = framing(s, fs, fd, fi)
-	N = fd * fs;									% cantidad de muestras
-	fstep = fi * fs;								% step entre cada una
-	M = floor((length(s) - N) / fstep + 1);
+function frames = framing(signal, fm, fd, fi)
+	N = fd * fm;									% cantidad de muestras
+	fstep = fi * fm;								% step entre cada una
+	M = floor((length(signal) - N) / fstep + 1);
 	
 	indf = fstep * [ 0:(M-1) ];						% indices por frames      
     inds = [ 1:N ].';								% indices por muestra
     ind = indf(ones(N,1),:) + inds(:,ones(1,M));
 	
-	r = s(ind);
+	frames = signal(ind);
 endfunction
 
 % Devuelve M frames, con N samples por frame
